@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  php-and-metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4', '8.5']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2.37.2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - name: Install validation tools
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils shellcheck
+      - name: Lint
+        run: ./tools/lint.sh
+      - name: Test
+        run: ./tools/test.sh
+      - name: Check package list
+        run: |
+          while IFS= read -r path; do
+            case "$path" in
+              /etc/*) source="files$path" ;;
+              %%DATADIR%%/THIRD_PARTY_NOTICES.md) source="THIRD_PARTY_NOTICES.md" ;;
+              %%DATADIR%%/LICENSE) source="LICENSE" ;;
+              %%DATADIR%%/*) source="files/usr/local/share/pfSense-pkg-WireGuard-ClientExport/${path#%%DATADIR%%/}" ;;
+              @dir*) continue ;;
+              *) source="files/usr/local/$path" ;;
+            esac
+            test -e "$source" || { echo "Missing source for pkg-plist entry: $path" >&2; exit 1; }
+          done < pkg-plist
+
+  wireguard-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WG_LEGACY_SHA: fb2c2f91b233005eabce6c9692b864050e7dd211
+      WG_CURRENT_SHA: a621624266b19a7f48b1f94a60821d2c2fc6ee4c
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up PHP 8.5
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2.37.2
+        with:
+          php-version: '8.5'
+          coverage: none
+      - name: Fetch pinned official WireGuard contracts
+        run: |
+          mkdir -p "${RUNNER_TEMP}/wg-legacy" "${RUNNER_TEMP}/wg-current"
+          for file in wg.inc wg_api.inc wg_foot.inc wg_globals.inc wg_guiconfig.inc wg_install.inc wg_service.inc wg_validate.inc; do
+            curl --fail --silent --show-error --location \
+              "https://raw.githubusercontent.com/pfsense/FreeBSD-ports/${WG_LEGACY_SHA}/net/pfSense-pkg-WireGuard/files/usr/local/pkg/wireguard/includes/${file}" \
+              --output "${RUNNER_TEMP}/wg-legacy/${file}"
+            curl --fail --silent --show-error --location \
+              "https://raw.githubusercontent.com/pfsense/FreeBSD-ports/${WG_CURRENT_SHA}/net/pfSense-pkg-WireGuard/files/usr/local/pkg/wireguard/includes/${file}" \
+              --output "${RUNNER_TEMP}/wg-current/${file}"
+          done
+      - name: Test official WireGuard contracts
+        env:
+          WGCLIENTEXPORT_WG_0_2_1_SOURCE_DIR: ${{ runner.temp }}/wg-legacy
+          WGCLIENTEXPORT_WG_CURRENT_SOURCE_DIR: ${{ runner.temp }}/wg-current
+        run: ./tools/test.sh

@@ -1,0 +1,10 @@
+/dist/
+/work/
+/.phpunit.cache/
+*.pkg
+*.txz
+.DS_Store
+/docs/PFSENSE_TEST_PLAN.md
+/docs/SECURITY.md
+/docs/SPEC.md
+/docs/TESTING.md
