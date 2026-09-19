@@ -1,0 +1,9 @@
+WireGuard Client Export is a minimal companion for the official pfSense
+WireGuard package. It provisions remote-access peers through the native
+WireGuard package API and returns a one-time client configuration and QR code.
+
+Client private keys are never persisted to the pfSense configuration, written
+to disk, or logged. The package does not manage tunnels, firewall rules, NAT,
+email delivery, telemetry, or background services.
+
+WWW: https://github.com/sirius0/pfsense-pkg-wireguard-client-export

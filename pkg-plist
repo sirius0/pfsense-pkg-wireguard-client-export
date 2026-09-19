@@ -1,0 +1,19 @@
+pkg/wgclientexport.xml
+pkg/wgclientexport/bootstrap.inc
+pkg/wgclientexport/client_config.inc
+pkg/wgclientexport/config.inc
+pkg/wgclientexport/ip_allocator.inc
+pkg/wgclientexport/provisioner.inc
+pkg/wgclientexport/validation.inc
+pkg/wgclientexport/wireguard_adapter.inc
+www/wgclientexport/js/qrcode.js
+www/wgclientexport/vpn_wg_client_export.php
+/etc/inc/priv/wgclientexport.priv.inc
+%%DATADIR%%/info.xml
+%%DATADIR%%/LICENSE
+%%DATADIR%%/THIRD_PARTY_NOTICES.md
+@dir www/wgclientexport/js
+@dir www/wgclientexport
+@dir pkg/wgclientexport
+@dir /etc/inc/priv
+@dir /etc/inc

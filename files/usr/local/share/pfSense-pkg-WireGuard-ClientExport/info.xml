@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<pfsensepkgs>
+	<package>
+		<name>WireGuard-ClientExport</name>
+		<descr><![CDATA[Minimal one-time WireGuard client provisioning for pfSense.&lt;br /&gt;
+				Creates a native WireGuard peer and returns a client configuration&lt;br /&gt;
+				and QR code without persisting the client private key.]]></descr>
+		<pkginfolink>https://github.com/sirius0/pfsense-pkg-wireguard-client-export</pkginfolink>
+		<version>%%PKGVERSION%%</version>
+		<configurationfile>wgclientexport.xml</configurationfile>
+	</package>
+</pfsensepkgs>
